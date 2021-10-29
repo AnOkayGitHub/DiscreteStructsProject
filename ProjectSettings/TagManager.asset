@@ -41,3 +41,9 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
+  - name: Snake
+    uniqueID: 440564173
+    locked: 0
+  - name: Item
+    uniqueID: 39034595
+    locked: 0
