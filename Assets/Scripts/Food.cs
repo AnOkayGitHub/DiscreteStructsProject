@@ -2,6 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+/*test*/
+
 public class Food : MonoBehaviour
 {
     [SerializeField] private BoxCollider2D grid;
