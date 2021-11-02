@@ -7,12 +7,7 @@ public class Food : MonoBehaviour
     [SerializeField] private BoxCollider2D grid;
     [SerializeField] private bool justSpawned = true;
 
-    private void Start()
-    {
-        RandomizePosition();
-    }
-
-    private void RandomizePosition()
+    public void RandomizePosition()
     {
         Bounds bounds = grid.bounds;
         float newX = Random.Range(bounds.min.x, bounds.max.x);
@@ -26,6 +21,9 @@ public class Food : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        RandomizePosition();
+        if(WorldSettings.state == WorldSettings.WorldState.Game)
+        {
+            RandomizePosition();
+        }
     }
 }

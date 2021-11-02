@@ -17,7 +17,10 @@ public class World : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        SetTime();
+        if(timeText.gameObject.activeSelf)
+        {
+            SetTime();
+        }
     }
 
     // Update is called once per frame

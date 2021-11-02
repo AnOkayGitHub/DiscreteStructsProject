@@ -11,6 +11,10 @@ public class Snake : MonoBehaviour
     [SerializeField] private GameObject munchPS;
     [SerializeField] private TextMeshProUGUI foodEatenText;
     [SerializeField] private GameObject gameOverScreen;
+    [SerializeField] private TextMeshProUGUI menuText;
+    [SerializeField] private TextMeshProUGUI buttonText;
+    [SerializeField] private TextMeshProUGUI countDownText;
+    [SerializeField] private GameObject[] UIelements;
 
     private Vector2 direction = Vector2.right;
     private Vector2 startPosition;
@@ -18,67 +22,54 @@ public class Snake : MonoBehaviour
     private bool canMove = true;
     private bool justAtefood = false;
     private bool waitingForReset = false;
+    private bool gameOver = false;
+    private bool countdown = false;
+    private float countDownTimer;
     private float startDelay;
     private int foodEaten = 0;
 
     private void Start()
     {
+        if(WorldSettings.food == null)
+        {
+            WorldSettings.food = GameObject.FindGameObjectWithTag("Food").GetComponent<Food>();
+        }
+
         startPosition = transform.position;
+        countDownTimer = 0;
 
         if(moveDelay == 0f)
         {
             moveDelay = WorldSettings.moveDelay;
         }
+
         startDelay = moveDelay;
-        Reset();
+        Reset(false);
     }
 
     private void Update()
     {
         if(!waitingForReset)
         {
-            if (Input.GetKeyDown(KeyCode.W))
-            {
-                direction = Vector2.up;
-            }
-
-            if (Input.GetKeyDown(KeyCode.A))
-            {
-                direction = Vector2.left;
-            }
-
-            if (Input.GetKeyDown(KeyCode.S))
-            {
-                direction = Vector2.down;
-            }
-
-            if (Input.GetKeyDown(KeyCode.D))
-            {
-                direction = Vector2.right;
-            }
-
-            if (canMove)
-            {
-                if (justAtefood)
-                {
-                    justAtefood = false;
-                }
-
-                for (int i = segments.Count - 1; i > 0; i--)
-                {
-                    segments[i].position = segments[i - 1].position;
-                }
-
-                transform.position = new Vector3(
-                    (int)(transform.position.x + direction.x),
-                    (int)(transform.position.y + direction.y),
-                    0);
-
-                StartCoroutine("WaitForMove");
-            }
+            Move();
         }
-        
-        
+
+        UpdateCountdown();
+
+
+    }
+
+    private void UpdateCountdown()
+    {
+        if (countDownTimer > 1)
+        {
+            countDownTimer -= Time.deltaTime;
+            countDownText.text = ((int)countDownTimer).ToString();
+        }
+        else
+        {
+            countDownText.text = "";
+        }
     }
 
     private IEnumerator WaitForMove()
@@ -88,6 +79,49 @@ public class Snake : MonoBehaviour
         canMove = true;
     }
 
+    private void Move()
+    {
+        if (Input.GetKeyDown(KeyCode.W))
+        {
+            direction = Vector2.up;
+        }
+
+        if (Input.GetKeyDown(KeyCode.A))
+        {
+            direction = Vector2.left;
+        }
+
+        if (Input.GetKeyDown(KeyCode.S))
+        {
+            direction = Vector2.down;
+        }
+
+        if (Input.GetKeyDown(KeyCode.D))
+        {
+            direction = Vector2.right;
+        }
+
+        if (canMove)
+        {
+            if (justAtefood)
+            {
+                justAtefood = false;
+            }
+
+            for (int i = segments.Count - 1; i > 0; i--)
+            {
+                segments[i].position = segments[i - 1].position;
+            }
+
+            transform.position = new Vector3(
+                (int)(transform.position.x + direction.x),
+                (int)(transform.position.y + direction.y),
+                0);
+
+            StartCoroutine("WaitForMove");
+        }
+    }
+
     private void Grow()
     {
         GameObject segment = (GameObject) Instantiate(segmentObject);
@@ -95,10 +129,31 @@ public class Snake : MonoBehaviour
         segments.Add(segment.transform);
     }
 
-    private void Reset()
+    private void Reset(bool over)
     {
-        gameOverScreen.gameObject.SetActive(true);
-        WorldSettings.state = WorldSettings.WorldState.Reset;
+        gameOver = over;
+
+        foreach(GameObject g in UIelements)
+        {
+            g.gameObject.SetActive(false);
+        }
+        
+
+        if (gameOver)
+        {
+            gameOverScreen.gameObject.SetActive(true);
+            menuText.text = "Game Over";
+            buttonText.text = "Play Again";
+        }
+        else
+        {
+            gameOverScreen.gameObject.SetActive(true);
+            menuText.text = "Snake";
+            buttonText.text = "Play";
+        }
+
+        
+        WorldSettings.state = WorldSettings.WorldState.Menu;
         waitingForReset = true;
         moveDelay = startDelay;
         foodEaten = 0;
@@ -117,6 +172,7 @@ public class Snake : MonoBehaviour
         {
             segments.Add(Instantiate(segmentObject).transform);
         }
+        WorldSettings.food.gameObject.transform.position = transform.position;
 
     }
 
@@ -136,7 +192,7 @@ public class Snake : MonoBehaviour
             }
             else if (collision.gameObject.tag == "Obstacle" && !justAtefood)
             {
-                Reset();
+                Reset(true);
             }
         }
         
@@ -145,6 +201,13 @@ public class Snake : MonoBehaviour
     public void Play()
     {
         gameOverScreen.gameObject.SetActive(false);
+
+        if (gameOver)
+        {
+            gameOver = false;
+        }
+
+        countDownTimer = WorldSettings.resetDelay + 1;
         StartCoroutine("WaitForPlay");
     }
 
@@ -154,5 +217,11 @@ public class Snake : MonoBehaviour
 
         waitingForReset = false;
         WorldSettings.state = WorldSettings.WorldState.Game;
+        WorldSettings.food.RandomizePosition();
+
+        foreach (GameObject g in UIelements)
+        {
+            g.gameObject.SetActive(true);
+        }
     }
 }
