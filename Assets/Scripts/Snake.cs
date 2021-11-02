@@ -10,6 +10,7 @@ public class Snake : MonoBehaviour
     [SerializeField] private int startSize = 4;
     [SerializeField] private GameObject munchPS;
     [SerializeField] private TextMeshProUGUI foodEatenText;
+    [SerializeField] private GameObject gameOverScreen;
 
     private Vector2 direction = Vector2.right;
     private Vector2 startPosition;
@@ -29,6 +30,7 @@ public class Snake : MonoBehaviour
             moveDelay = WorldSettings.moveDelay;
         }
         startDelay = moveDelay;
+        Reset();
     }
 
     private void Update()
@@ -95,8 +97,9 @@ public class Snake : MonoBehaviour
 
     private void Reset()
     {
+        gameOverScreen.gameObject.SetActive(true);
         WorldSettings.state = WorldSettings.WorldState.Reset;
-
+        waitingForReset = true;
         moveDelay = startDelay;
         foodEaten = 0;
         foodEatenText.text = foodEaten.ToString();
@@ -114,8 +117,6 @@ public class Snake : MonoBehaviour
         {
             segments.Add(Instantiate(segmentObject).transform);
         }
-
-        WaitForReset();
 
     }
 
@@ -141,9 +142,17 @@ public class Snake : MonoBehaviour
         
     }
 
-    private void WaitForReset()
+    public void Play()
     {
-        waitingForReset = true;
-        
+        gameOverScreen.gameObject.SetActive(false);
+        StartCoroutine("WaitForPlay");
+    }
+
+    private IEnumerator WaitForPlay()
+    {
+        yield return new WaitForSeconds(WorldSettings.resetDelay);
+
+        waitingForReset = false;
+        WorldSettings.state = WorldSettings.WorldState.Game;
     }
 }

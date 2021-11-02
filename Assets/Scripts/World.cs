@@ -6,7 +6,7 @@ using UnityEngine;
 public class World : MonoBehaviour
 {
     [SerializeField] private TextMeshProUGUI timeText;
-    [SerializeField] private GameObject gameOverScreen;
+
     private float time = 0;
 
     private void SetTime()
