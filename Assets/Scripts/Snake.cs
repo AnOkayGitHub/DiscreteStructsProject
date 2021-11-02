@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 public class Snake : MonoBehaviour
@@ -7,15 +8,17 @@ public class Snake : MonoBehaviour
     [SerializeField] private float moveDelay;
     [SerializeField] private GameObject segmentObject;
     [SerializeField] private int startSize = 4;
+    [SerializeField] private GameObject munchPS;
+    [SerializeField] private TextMeshProUGUI foodEatenText;
 
     private Vector2 direction = Vector2.right;
     private Vector2 startPosition;
     private List<Transform> segments = new List<Transform>();
     private bool canMove = true;
-    private bool foodEaten = false;
+    private bool justAtefood = false;
+    private bool waitingForReset = false;
     private float startDelay;
-    
-    
+    private int foodEaten = 0;
 
     private void Start()
     {
@@ -26,52 +29,53 @@ public class Snake : MonoBehaviour
             moveDelay = WorldSettings.moveDelay;
         }
         startDelay = moveDelay;
-
-        Reset();
     }
-
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.W))
+        if(!waitingForReset)
         {
-            direction = Vector2.up;
-        }
-
-        if (Input.GetKeyDown(KeyCode.A))
-        {
-            direction = Vector2.left;
-        }
-
-        if (Input.GetKeyDown(KeyCode.S))
-        {
-            direction = Vector2.down;
-        }
-
-        if (Input.GetKeyDown(KeyCode.D))
-        {
-            direction = Vector2.right;
-        }
-
-        if(canMove)
-        {
-            if(foodEaten)
+            if (Input.GetKeyDown(KeyCode.W))
             {
-                foodEaten = false;
+                direction = Vector2.up;
             }
 
-            for (int i = segments.Count - 1; i > 0; i--)
+            if (Input.GetKeyDown(KeyCode.A))
             {
-                segments[i].position = segments[i - 1].position;
+                direction = Vector2.left;
             }
 
-            transform.position = new Vector3(
-                (int)(transform.position.x + direction.x),
-                (int)(transform.position.y + direction.y),
-                0);
+            if (Input.GetKeyDown(KeyCode.S))
+            {
+                direction = Vector2.down;
+            }
 
-            StartCoroutine("WaitForMove");
+            if (Input.GetKeyDown(KeyCode.D))
+            {
+                direction = Vector2.right;
+            }
+
+            if (canMove)
+            {
+                if (justAtefood)
+                {
+                    justAtefood = false;
+                }
+
+                for (int i = segments.Count - 1; i > 0; i--)
+                {
+                    segments[i].position = segments[i - 1].position;
+                }
+
+                transform.position = new Vector3(
+                    (int)(transform.position.x + direction.x),
+                    (int)(transform.position.y + direction.y),
+                    0);
+
+                StartCoroutine("WaitForMove");
+            }
         }
+        
         
     }
 
@@ -91,12 +95,17 @@ public class Snake : MonoBehaviour
 
     private void Reset()
     {
+        WorldSettings.state = WorldSettings.WorldState.Reset;
+
         moveDelay = startDelay;
+        foodEaten = 0;
+        foodEatenText.text = foodEaten.ToString();
 
         for (int i = 1; i < segments.Count; i++)
         {
             Destroy(segments[i].gameObject, 0f);
         }
+
         segments.Clear();
         segments.Add(transform);
         transform.position = startPosition;
@@ -106,20 +115,35 @@ public class Snake : MonoBehaviour
             segments.Add(Instantiate(segmentObject).transform);
         }
 
+        WaitForReset();
 
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.gameObject.tag == "Food")
+        if (WorldSettings.state == WorldSettings.WorldState.Game)
         {
-            Grow();
-            foodEaten = true;
-            //moveDelay -= WorldSettings.movementIncrease;
-        } 
-        else if (collision.gameObject.tag == "Obstacle" && !foodEaten)
-        {
-            Reset();
+            if (collision.gameObject.tag == "Food")
+            {
+                Grow();
+                justAtefood = true;
+                foodEaten += 1;
+                foodEatenText.text = foodEaten.ToString();
+                GameObject ps = (GameObject)Instantiate(munchPS);
+                ps.transform.position = transform.position;
+                Destroy(ps, 1f);
+            }
+            else if (collision.gameObject.tag == "Obstacle" && !justAtefood)
+            {
+                Reset();
+            }
         }
+        
+    }
+
+    private void WaitForReset()
+    {
+        waitingForReset = true;
+        
     }
 }
