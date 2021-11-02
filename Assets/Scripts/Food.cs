@@ -2,8 +2,11 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+<<<<<<< Updated upstream
 /*test2*/
 
+=======
+>>>>>>> Stashed changes
 public class Food : MonoBehaviour
 {
     [SerializeField] private BoxCollider2D grid;
