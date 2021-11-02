@@ -15,6 +15,7 @@ public class Snake : MonoBehaviour
     [SerializeField] private TextMeshProUGUI buttonText;
     [SerializeField] private TextMeshProUGUI countDownText;
     [SerializeField] private GameObject[] UIelements;
+    [SerializeField] private GameObject gfx;
 
     private Vector2 direction = Vector2.right;
     private Vector2 startPosition;
@@ -44,6 +45,9 @@ public class Snake : MonoBehaviour
         }
 
         startDelay = moveDelay;
+
+        gfx = transform.GetChild(0).gameObject;
+
         Reset(false);
     }
 
@@ -55,8 +59,28 @@ public class Snake : MonoBehaviour
         }
 
         UpdateCountdown();
+        UpdateGFX();
+    }
 
-
+    private void UpdateGFX()
+    {
+        if(direction == Vector2.right)
+        {
+            gfx.transform.localRotation = Quaternion.Euler(new Vector3(0f, 0f, -90f));
+        } 
+        else if(direction == Vector2.left)
+        {
+            gfx.transform.localRotation = Quaternion.Euler(new Vector3(0f, 0f, 90f));
+        }
+        else if (direction == Vector2.up)
+        {
+            gfx.transform.localRotation = Quaternion.Euler(new Vector3(0f, 0f, 0f));
+        }
+        else if (direction == Vector2.down)
+        {
+            gfx.transform.localRotation = Quaternion.Euler(new Vector3(0f, 0f, 180f));
+        }
+        
     }
 
     private void UpdateCountdown()
@@ -64,19 +88,12 @@ public class Snake : MonoBehaviour
         if (countDownTimer > 1)
         {
             countDownTimer -= Time.deltaTime;
-            countDownText.text = ((int)countDownTimer).ToString();
+            countDownText.text = "Starting in " + ((int)countDownTimer).ToString() + "...";
         }
         else
         {
             countDownText.text = "";
         }
-    }
-
-    private IEnumerator WaitForMove()
-    {
-        canMove = false;
-        yield return new WaitForSeconds(moveDelay);
-        canMove = true;
     }
 
     private void Move()
@@ -176,26 +193,27 @@ public class Snake : MonoBehaviour
 
     }
 
-    private void OnTriggerEnter2D(Collider2D collision)
+    private IEnumerator WaitForPlay()
     {
-        if (WorldSettings.state == WorldSettings.WorldState.Game)
+        foreach (GameObject g in UIelements)
         {
-            if (collision.gameObject.tag == "Food")
-            {
-                Grow();
-                justAtefood = true;
-                foodEaten += 1;
-                foodEatenText.text = foodEaten.ToString();
-                GameObject ps = (GameObject)Instantiate(munchPS);
-                ps.transform.position = transform.position;
-                Destroy(ps, 1f);
-            }
-            else if (collision.gameObject.tag == "Obstacle" && !justAtefood)
-            {
-                Reset(true);
-            }
+            g.gameObject.SetActive(true);
         }
-        
+
+        yield return new WaitForSeconds(WorldSettings.resetDelay);
+
+        waitingForReset = false;
+        WorldSettings.state = WorldSettings.WorldState.Game;
+        WorldSettings.food.RandomizePosition();
+
+
+    }
+
+    private IEnumerator WaitForMove()
+    {
+        canMove = false;
+        yield return new WaitForSeconds(moveDelay);
+        canMove = true;
     }
 
     public void Play()
@@ -211,17 +229,29 @@ public class Snake : MonoBehaviour
         StartCoroutine("WaitForPlay");
     }
 
-    private IEnumerator WaitForPlay()
+    
+
+    private void OnTriggerEnter2D(Collider2D collision)
     {
-        yield return new WaitForSeconds(WorldSettings.resetDelay);
-
-        waitingForReset = false;
-        WorldSettings.state = WorldSettings.WorldState.Game;
-        WorldSettings.food.RandomizePosition();
-
-        foreach (GameObject g in UIelements)
+        if (WorldSettings.state == WorldSettings.WorldState.Game)
         {
-            g.gameObject.SetActive(true);
+            if (collision.gameObject.tag == "Food")
+            {
+                Grow();
+                justAtefood = true;
+                foodEaten += 1;
+                foodEatenText.text = foodEaten.ToString();
+                GameObject ps = (GameObject)Instantiate(munchPS);
+                ps.transform.position = transform.position;
+                Destroy(ps, 1f);
+
+                //moveDelay -= WorldSettings.movementIncrease;
+            }
+            else if (collision.gameObject.tag == "Obstacle" && !justAtefood)
+            {
+                Reset(true);
+            }
         }
+
     }
 }
