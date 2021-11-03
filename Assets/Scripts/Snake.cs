@@ -229,8 +229,6 @@ public class Snake : MonoBehaviour
         StartCoroutine("WaitForPlay");
     }
 
-    
-
     private void OnTriggerEnter2D(Collider2D collision)
     {
         if (WorldSettings.state == WorldSettings.WorldState.Game)
