@@ -7,6 +7,7 @@ TagManager:
   - Snake
   - Food
   - Obstacle
+  - UIFade
   layers:
   - Default
   - TransparentFX
@@ -55,4 +56,7 @@ TagManager:
     locked: 0
   - name: Obstacle
     uniqueID: 2432657299
+    locked: 0
+  - name: UI
+    uniqueID: 2896270905
     locked: 0

@@ -6,36 +6,35 @@ using UnityEngine;
 public class Snake : MonoBehaviour
 {
     [SerializeField] private float moveDelay;
-    [SerializeField] private GameObject segmentObject;
+    [SerializeField] private float loseWaitTime;
     [SerializeField] private int startSize = 4;
-    [SerializeField] private GameObject munchPS;
     [SerializeField] private TextMeshProUGUI foodEatenText;
-    [SerializeField] private GameObject gameOverScreen;
     [SerializeField] private TextMeshProUGUI menuText;
     [SerializeField] private TextMeshProUGUI buttonText;
     [SerializeField] private TextMeshProUGUI countDownText;
-    [SerializeField] private GameObject[] UIelements;
-    [SerializeField] private GameObject gfx;
+    [SerializeField] private GameObject[] menuObjects;
+    [SerializeField] private GameObject gameOverScreen;
+    [SerializeField] private GameObject segmentObject;
+    [SerializeField] private GameObject munchPS;
+    [SerializeField] private GameObject snakeExplodePS;
 
+    private List<Transform> segments = new List<Transform>();
+    private GameObject gfx;
     private Vector2 direction = Vector2.right;
     private Vector2 startPosition;
-    private List<Transform> segments = new List<Transform>();
     private bool canMove = true;
     private bool justAtefood = false;
     private bool waitingForReset = false;
     private bool gameOver = false;
     private bool countdown = false;
+    private bool gfxOff = false;
     private float countDownTimer;
     private float startDelay;
     private int foodEaten = 0;
+    
 
     private void Start()
     {
-        if(WorldSettings.food == null)
-        {
-            WorldSettings.food = GameObject.FindGameObjectWithTag("Food").GetComponent<Food>();
-        }
-
         startPosition = transform.position;
         countDownTimer = 0;
 
@@ -53,7 +52,7 @@ public class Snake : MonoBehaviour
 
     private void Update()
     {
-        if(!waitingForReset)
+        if(!waitingForReset && !gameOver)
         {
             Move();
         }
@@ -80,7 +79,24 @@ public class Snake : MonoBehaviour
         {
             gfx.transform.localRotation = Quaternion.Euler(new Vector3(0f, 0f, 180f));
         }
-        
+
+        if(WorldSettings.state != WorldSettings.WorldState.Game && !gfxOff)
+        {
+            gfxOff = true;
+            for (int i = 1; i < segments.Count; i++)
+            {
+                segments[i].transform.GetChild(0).gameObject.SetActive(false);
+            }
+        }
+        else if (WorldSettings.state == WorldSettings.WorldState.Game && gfxOff)
+        {
+            gfxOff = false;
+            for (int i = 1; i < segments.Count; i++)
+            {
+                segments[i].transform.GetChild(0).gameObject.SetActive(true);
+            }
+        }
+
     }
 
     private void UpdateCountdown()
@@ -149,8 +165,8 @@ public class Snake : MonoBehaviour
     private void Reset(bool over)
     {
         gameOver = over;
-
-        foreach(GameObject g in UIelements)
+        WorldSettings.fadeAnimator.Play("FadeFromBlack", -1, 0f);
+        foreach (GameObject g in menuObjects)
         {
             g.gameObject.SetActive(false);
         }
@@ -195,11 +211,11 @@ public class Snake : MonoBehaviour
 
     private IEnumerator WaitForPlay()
     {
-        foreach (GameObject g in UIelements)
+        foreach (GameObject g in menuObjects)
         {
             g.gameObject.SetActive(true);
         }
-
+        WorldSettings.fadeAnimator.Play("FadeFromBlack", -1, 0f);
         yield return new WaitForSeconds(WorldSettings.resetDelay);
 
         waitingForReset = false;
@@ -247,9 +263,33 @@ public class Snake : MonoBehaviour
             }
             else if (collision.gameObject.tag == "Obstacle" && !justAtefood)
             {
-                Reset(true);
+                WorldSettings.fadeAnimator.Play("FadeToBlack", -1, 0f);
+                StartCoroutine("LoseGame");
+                
             }
         }
 
+    }
+
+    private IEnumerator LoseGame()
+    {
+        for (int i = 0; i < segments.Count; i++)
+        {
+            segments[i].GetChild(0).gameObject.SetActive(false);
+            Vector2 pos = segments[i].transform.position;
+            GameObject snakeExplode = (GameObject)Instantiate(snakeExplodePS);
+            snakeExplode.transform.position = pos;
+            Destroy(snakeExplode, 1f);
+        }
+
+        gameOver = true;
+        yield return new WaitForSeconds(loseWaitTime);
+
+        for (int i = 0; i < segments.Count; i++)
+        {
+            segments[i].GetChild(0).gameObject.SetActive(true);
+        }
+
+        Reset(true);
     }
 }

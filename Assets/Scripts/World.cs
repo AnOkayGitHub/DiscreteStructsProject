@@ -21,6 +21,16 @@ public class World : MonoBehaviour
         {
             SetTime();
         }
+
+        if(WorldSettings.fadeAnimator == null)
+        {
+            WorldSettings.fadeAnimator = GameObject.FindGameObjectWithTag("UIFade").GetComponent<Animator>();
+        }
+
+        if (WorldSettings.food == null)
+        {
+            WorldSettings.food = GameObject.FindGameObjectWithTag("Food").GetComponent<Food>();
+        }
     }
 
     // Update is called once per frame

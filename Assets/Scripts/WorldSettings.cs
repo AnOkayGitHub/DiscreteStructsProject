@@ -16,4 +16,5 @@ public static class WorldSettings
     public static float movementIncrease = 0.0025f;
     public static float resetDelay = 3f;
     public static Food food = null;
+    public static Animator fadeAnimator;
 }
