@@ -205,7 +205,6 @@ public class Snake : MonoBehaviour
         {
             segments.Add(Instantiate(segmentObject).transform);
         }
-        WorldSettings.food.gameObject.transform.position = transform.position;
 
     }
 
@@ -220,7 +219,6 @@ public class Snake : MonoBehaviour
 
         waitingForReset = false;
         WorldSettings.state = WorldSettings.WorldState.Game;
-        WorldSettings.food.RandomizePosition();
 
 
     }

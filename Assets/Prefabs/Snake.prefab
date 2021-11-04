@@ -71,7 +71,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 440564173
   m_SortingLayer: 2
-  m_SortingOrder: 1
+  m_SortingOrder: 2
   m_Sprite: {fileID: 21300000, guid: 1c244a23b81bc2b448e2eb186a65269b, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -108,7 +108,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 820417645}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.5, z: 0}
+  m_LocalPosition: {x: 0, y: 0.25, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 63685934}
@@ -259,16 +259,21 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   moveDelay: 0.125
-  segmentObject: {fileID: 4882486968369948903, guid: cab5d7226c8a66c45a154af4f5e63fed, type: 3}
-  startSize: 2
-  munchPS: {fileID: 7119756775685811483, guid: 0308d6bf0f9c6b249bc544e6a8953e2d, type: 3}
+  loseWaitTime: 0.5
+  startSize: 4
   foodEatenText: {fileID: 0}
-  gameOverScreen: {fileID: 0}
   menuText: {fileID: 0}
   buttonText: {fileID: 0}
   countDownText: {fileID: 0}
-  UIelements:
+  menuObjects:
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
-  gfx: {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 63685933}
+  - {fileID: 0}
+  gameOverScreen: {fileID: 0}
+  segmentObject: {fileID: 4882486968369948903, guid: cab5d7226c8a66c45a154af4f5e63fed, type: 3}
+  munchPS: {fileID: 7119756775685811483, guid: 0308d6bf0f9c6b249bc544e6a8953e2d, type: 3}
+  snakeExplodePS: {fileID: 2532328127334558989, guid: 63748c88b103c974b9b8a1c006e48b63, type: 3}
