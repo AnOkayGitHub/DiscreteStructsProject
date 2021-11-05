@@ -17,6 +17,7 @@ public class Snake : MonoBehaviour
     [SerializeField] private GameObject segmentObject;
     [SerializeField] private GameObject munchPS;
     [SerializeField] private GameObject snakeExplodePS;
+    [SerializeField] private AudioClip[] clips;
 
     private List<Transform> segments = new List<Transform>();
     private GameObject gfx;
@@ -31,10 +32,12 @@ public class Snake : MonoBehaviour
     private float countDownTimer;
     private float startDelay;
     private int foodEaten = 0;
+    private AudioSource audioSource;
     
 
     private void Start()
     {
+        audioSource = GetComponent<AudioSource>();
         startPosition = transform.position;
         countDownTimer = 0;
 
@@ -243,12 +246,19 @@ public class Snake : MonoBehaviour
         StartCoroutine("WaitForPlay");
     }
 
+    private void PlaySound(AudioClip sound)
+    {
+        audioSource.clip = sound;
+        audioSource.Play();
+    }
+
     private void OnTriggerEnter2D(Collider2D collision)
     {
         if (WorldSettings.state == WorldSettings.WorldState.Game)
         {
             if (collision.gameObject.tag == "Food")
             {
+                PlaySound(clips[0]);
                 Grow();
                 justAtefood = true;
                 foodEaten += 1;
