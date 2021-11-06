@@ -174,7 +174,6 @@ public class Snake : MonoBehaviour
             g.gameObject.SetActive(false);
         }
         
-
         if (gameOver)
         {
             gameOverScreen.gameObject.SetActive(true);
@@ -189,7 +188,7 @@ public class Snake : MonoBehaviour
         }
 
         
-        WorldSettings.state = WorldSettings.WorldState.Menu;
+        WorldSettings.state = WorldSettings.WorldState.MainMenu;
         waitingForReset = true;
         moveDelay = startDelay;
         foodEaten = 0;
@@ -235,6 +234,7 @@ public class Snake : MonoBehaviour
 
     public void Play()
     {
+        SongManager.PlayButtonSound();
         gameOverScreen.gameObject.SetActive(false);
 
         if (gameOver)

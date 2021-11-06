@@ -6,6 +6,8 @@ using UnityEngine;
 public class World : MonoBehaviour
 {
     [SerializeField] private TextMeshProUGUI timeText;
+    [SerializeField] private GameObject mainMenu;
+    [SerializeField] private GameObject settingsMenu;
 
     private float time = 0;
 
@@ -36,16 +38,51 @@ public class World : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        UpdateTime();
+        SetTime();
         Debug.Log(WorldSettings.state);
-        if(WorldSettings.state == WorldSettings.WorldState.Game)
+        switch(WorldSettings.state)
+        {
+            case WorldSettings.WorldState.MainMenu:
+                if(!mainMenu.activeSelf || settingsMenu.activeSelf)
+                {
+                    settingsMenu.SetActive(false);
+                    mainMenu.SetActive(true);
+                }
+                break;
+            case WorldSettings.WorldState.SettingsMenu:
+                if (mainMenu.activeSelf || !settingsMenu.activeSelf)
+                {
+                    mainMenu.SetActive(false);
+                    settingsMenu.SetActive(true);
+                }
+                break;
+        }
+    }
+
+    private void UpdateTime()
+    {
+        if (WorldSettings.state == WorldSettings.WorldState.Game)
         {
             time += Time.deltaTime;
-            SetTime();
         }
         else
         {
             time = 0;
-            SetTime();
         }
+    }
+
+    public void Settings()
+    {
+        SongManager.PlayButtonSound();
+        WorldSettings.state = WorldSettings.WorldState.SettingsMenu;
+        Debug.Log("State: Settings");
+    }
+
+    public void MainMenu()
+    {
+        SongManager.PlayButtonSound();
+        WorldSettings.state = WorldSettings.WorldState.MainMenu;
+        Debug.Log("State: Main");
     }
 }
